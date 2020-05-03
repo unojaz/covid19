@@ -79,7 +79,8 @@ with open('./docs/timeseries.json') as f:
     data = json.load(f)
 
 #country_list=["India","Russia","France","Italy","Spain"]
-country_list=["India","Switzerland","Netherlands","Canada","Brazil","Russia","Iran"]
+#country_list=["India","Peru","Netherlands","Belgium","Canada","Brazil","Iran"]
+country_list=["India","Russia","Peru","Belgium","Brazil","Iran"]
 country_legend=["orange","green","red","blue","black","yellow","magenta"]
 
 # country_list=["India","Pakistan"]
@@ -98,15 +99,15 @@ for each_data in covid_data:
     each_data.calculate_other()
     each_data.calculate_wt_offset()
 
-what_to_plt="confirmed"
-what_to_plt2="conf doub days"
+what_to_plt="confirmed off"
+#what_to_plt2="conf doub days"
 
 fig, axs = plt.subplots(1, 1)
 for each_data in covid_data:
-    #each_data.add_to_plt(axs,what_to_plt)
-    each_data.add_to_plt2(axs,what_to_plt,what_to_plt2)
-#axs.set_xlabel("Days")
-axs.set_ylabel(what_to_plt2)
+    each_data.add_to_plt(axs,what_to_plt)
+    #each_data.add_to_plt2(axs,what_to_plt,what_to_plt2)
+axs.set_xlabel("Days")
+#axs.set_ylabel(what_to_plt2)
 axs.set_xlabel(what_to_plt)
 axs.set_title(what_to_plt +" Country wise")
 axs.grid(True)
