@@ -5,38 +5,76 @@ import matplotlib.pyplot as plt
 import random 
 # import itertools
 
+from sys import exit
+state_short_cut={"UP":"Uttar Pradesh",
+"MH":"Maharashtra",
+"BI":"Bihar",
+"WB":"West Bengal",
+"MP":"Madhya Pradesh",
+"TN":"Tamil Nadu",
+"RJ":"Rajasthan",
+"KN":"Karnataka",
+"GJ":"Gujarat",
+"AP":"Andhra Pradesh",
+"OD":"Odisha",
+"TS":"Telengana",
+"KL":"Kerala",
+"JH":"Jharkhand",
+"AS":"Assam",
+"PJ":"Punjab",
+"UP":"Uttar Pradesh",
+"CH":"Chhattisgarh",
+"HR":"Haryana",
+"UT":"Uttarakhand",
+"HP":"Himachal Pradesh",
+"TP":"Tripura",
+"MG":"Meghalaya",
+"MN":"Manipur",
+"NG":"Nagaland",
+"GO":"Goa",
+"AR":"Arunachal Pradesh",
+"MZ":"Mizoram",
+"SK":"Sikkim",
+"DL":"Delhi",
+"JK":"Jammu and Kashmir",
+"PO":"Puducherry",
+"CN":"Chandigarh",
+"DD":"Dadra and Nagar Haveli and Daman and Diu",
+"AN":"Andaman and Nicobar Islands",
+"LD":"Ladakh",
+"LK":"Lakshadweep"}
 
-
-class CovidForCountry:
-    def __init__(self,country):
-        self.country = country
+class CovidForState:
+    def __init__(self,state):
+        self.state = state
         self.data_legend="-k"
 
     def read_data(self,given_data):
-        county_data = given_data[self.country]
-        day = 0
+        state_full=state_short_cut[self.state]
+        state_data = given_data[given_data["State/UnionTerritory"]==state_full]
+        data_count=state_data.shape[0]
         self.data={}
-        self.data["days"]=[]
-        self.data["confirmed"] = []
-        self.data["deaths"] = []
-        self.data["recovered"] = []
-        for day_data in county_data:
-            # print(day_data)
-            self.data["days"].append(day)
-            self.data["confirmed"].append(day_data['confirmed'])
-            self.data["deaths"].append(day_data['deaths'])
-            self.data["recovered"].append(day_data['recovered'])
-            day += 1
+        self.data["days"]=list(range(data_count))
+        self.data["confirmed"] = list(state_data["Confirmed"])
+        self.data["deaths"] = list(state_data["Deaths"])
+        self.data["recovered"] = list(state_data["Cured"])
+#        for day_data in state_data:
+#            # print(day_data)
+#            self.data["days"].append(day)
+#            self.data["confirmed"].append(day_data['confirmed'])
+#            self.data["deaths"].append(day_data['deaths'])
+#            self.data["recovered"].append(day_data['recovered'])
+#            day += 1
 
     def set_legend(self,legend_string):
         self.data_legend=legend_string
         
     def add_to_plt2(self,axes,plot_x,plot_y):
-        axes.plot(self.data[plot_x][:np.size(self.data[plot_y])],self.data[plot_y],color=self.data_legend,linestyle='solid',label=self.country)
+        axes.plot(self.data[plot_x][:np.size(self.data[plot_y])],self.data[plot_y],color=self.data_legend,linestyle='solid',label=self.state)
 
     def add_to_plt(self,axes,plot_qty):
         data_size=np.size(self.data[plot_qty])
-        axes.plot(range(data_size),self.data[plot_qty],color=self.data_legend,linestyle='solid',label=self.country)
+        axes.plot(range(data_size),self.data[plot_qty],color=self.data_legend,linestyle='solid',label=self.state)
 
     def calculate_other(self):
         self.data["recov / conf"] = [a/b if b>50 else 0 for a,b in zip(self.data["recovered"],self.data["confirmed"])]
@@ -76,25 +114,23 @@ class CovidForCountry:
         self.data["confirmed off"] = self.data["confirmed"][index:]
 
 
-with open('./docs/timeseries.json') as f:
-    data = json.load(f)
+data = pd.read_csv("./india_data/covid_19_india.csv")
 
-#country_list=["India","Russia","France","Italy","Spain"]
-#country_list=["India","Peru","Netherlands","Belgium","Canada","Brazil","Iran"]
-country_list=["India","Russia","Spain","United Kingdom","Brazil","US","Italy","France","Germany","Turkey"] #,"US"]
-country_legend=["orange","green","red","blue","black","yellow","magenta"]
 
-# country_list=["India","Pakistan"]
-# country_legend=["orange","green"]
+#state_list=["India","Russia","France","Italy","Spain"]
+#state_list=["India","Peru","Netherlands","Belgium","Canada","Brazil","Iran"]
+state_list=["MH","TN","DL","KN","KL","AP","RJ","UP"]
+state_legend=["orange","green","red","blue","black","yellow","magenta"]
+
 
 
 covid_data=[]
 
-for icount in range(np.size(country_list)):
-    covid_data_obj=CovidForCountry(country_list[icount])
+for icount in range(np.size(state_list)):
+    covid_data_obj=CovidForState(state_list[icount])
     covid_data_obj.read_data(data)
-    if icount < len(country_legend): 
-        covid_data_obj.set_legend(country_legend[icount])
+    if icount < len(state_legend): 
+        covid_data_obj.set_legend(state_legend[icount])
     else:
         random_color=(random.randint(0,255)/255.0,random.randint(0,255)/255.0,random.randint(0,255)/255.0)
         covid_data_obj.set_legend(random_color)
@@ -102,7 +138,7 @@ for icount in range(np.size(country_list)):
 
 for each_data in covid_data:
     each_data.calculate_other()
-    each_data.calculate_wt_offset()
+    each_data.calculate_wt_offset(100)
 
 what_to_plt="confirmed"
 what_to_plt2="confirm mov avg"
